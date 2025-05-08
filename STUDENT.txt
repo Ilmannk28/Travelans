@@ -1,0 +1,2 @@
+APP_URL=<url_aplikasi>
+MAP_SERVICE_API_KEY=fLsjXXZ1yN5o8SqA5HC4
