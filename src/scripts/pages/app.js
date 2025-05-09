@@ -36,12 +36,23 @@ class App {
   }
 
   async renderPage() {
-    const url = getActiveRoute();
-    const pageFactory = routes[url]; 
-    const page = pageFactory();
+    try {
+      const url = getActiveRoute();
+      const pageFactory = routes[url];
 
-    this.#content.innerHTML = await page.render();
-    await page.afterRender();
+      if (!pageFactory) throw new Error('Halaman tidak ditemukan');
+
+      const page = pageFactory();
+
+      if (!page) throw new Error('Akses tidak diizinkan atau belum login');
+
+      this.#content.innerHTML = await page.render();
+      await page.afterRender();
+    } catch (error) {
+      console.error('renderPage error:', error);
+      this.#content.innerHTML = `<p class="error">Halaman gagal dimuat: ${error.message}</p>`;
+    }
+
   }
 }
 

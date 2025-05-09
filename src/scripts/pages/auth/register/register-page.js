@@ -66,11 +66,17 @@ export default class RegisterPage {
     });
   }
 
-  registeredSuccessfully(message) {
-    console.log(message);
+  registeredSuccessfully(message, data) {
+    console.log('register success', message);
 
-    // Redirect
-    location.hash = '/login';
+    if (data?.token) {
+      putAccessToken(data.token); 
+      location.hash = '/';
+    } 
+    else {
+      // Jika token tidak tersedia, tetap redirect ke login
+      location.hash = '/login';
+    }
   }
 
   registeredFailed(message) {

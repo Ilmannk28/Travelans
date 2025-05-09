@@ -23,17 +23,14 @@ export default class LoginPresenter {
         return;
       }
 
-      if (!response.data || !response.data.accessToken) {
+      if (!response.loginResult || !response.loginResult.token) {
         console.error('getLogin: No accessToken in response data');
         this.#view.loginFailed('Token akses tidak ditemukan');
         return;
       }
-
-      this.#authModel.putAccessToken(response.data.accessToken);
-
-      this.#view.loginSuccessfully(response.message, response.data);
+      this.#authModel.putAccessToken(response.loginResult.token);
+      this.#view.loginSuccessfully(response.message, response.loginResult);
     } catch (error) {
-      
       console.error('getLogin: error:', error);
       this.#view.loginFailed(error.message || 'Terjadi kesalahan saat login');
     } finally {
