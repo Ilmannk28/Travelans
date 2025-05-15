@@ -104,6 +104,33 @@ export async function getGuestStories() {
   };
 }
 
+export async function addNewStory({ description, photo, lat = null, lon = null }) {
+  const accessToken = getAccessToken();
+  const formData = new FormData();
+  formData.append('description', description);
+  formData.append('lat', lat);
+  formData.append('lon', lon);
+  if (photo.length > 0) {
+    formData.append('photo', photo[0]);
+
+    const fetchResponse = await fetch(`${BASE_URL}/stories`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+
+    const json = await fetchResponse.json();
+
+    return {
+      ...json,
+      ok: fetchResponse.ok,
+    };
+  }
+}
+
+
 // Notification
 export async function subscribeNotification() {
   const accessToken = getAccessToken();

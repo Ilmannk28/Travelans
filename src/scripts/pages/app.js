@@ -20,7 +20,7 @@ export default class App {
     this.#drawerNavigation = drawerNavigation;
     this.#skipLinkButton = skipLinkButton;
 
-    this.#setupDrawer();
+    this.#init();
   }
 
   

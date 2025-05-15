@@ -8,10 +8,6 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Arial', sans-serif;
-}
-
 .container {
   padding-inline: 32px;
   margin-inline: auto;
@@ -78,7 +74,7 @@ header {
     inset-block-start 0ms 150ms,
     transform 0ms 150ms;
 
-  z-index: 9999;
+  /* z-index: 9999; */
 }
 
 .navigation-drawer.open {
@@ -87,6 +83,22 @@ header {
   opacity: 1;
 
   transition: opacity 150ms;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+
+  z-index: 9999;
+  position: relative;
+}
+
+.nav-list li {
+  display: flex;
+  align-items: center;
+  color: #5d5d5d;
+  gap: 10px;
 }
 
 .drawer-button {
@@ -231,6 +243,7 @@ header {
 
   .nav-list {
     flex-direction: row;
+
   }
 
   .nav-list li a {
