@@ -104,31 +104,31 @@ export async function getGuestStories() {
   };
 }
 
-export async function addNewStory({ description, photo, lat = null, lon = null }) {
+export async function addNewStory({description, photo, lat, lon}) {
   const accessToken = getAccessToken();
   const formData = new FormData();
+  const file = new File([photo], 'image.jpg', { type: 'image/jpeg' });
   formData.append('description', description);
-  formData.append('lat', lat);
-  formData.append('lon', lon);
-  if (photo.length > 0) {
-    formData.append('photo', photo[0]);
+  formData.append('photo', file);
+  if (lat) formData.append('lat', lat);
+  if (lon) formData.append('lon', lon);
 
-    const fetchResponse = await fetch(`${BASE_URL}/stories`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: formData,
-    });
+  const fetchResponse = await fetch(`${BASE_URL}/stories`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  });
 
-    const json = await fetchResponse.json();
-
-    return {
-      ...json,
-      ok: fetchResponse.ok,
-    };
+  const result = await fetchResponse.json();
+  if (!fetchResponse.ok) {
+    throw new Error(result.message || 'Gagal mengirim laporan');
   }
+
+  return result;
 }
+
 
 
 // Notification

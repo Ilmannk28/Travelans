@@ -3,16 +3,18 @@ import { convertBase64ToBlob } from '../../utils';
 import * as StoryAPI from '../../data/api';
 import { generateLoaderAbsoluteTemplate } from '../../tamplate';
 import Camera from '../../utils/camera';
+import Map from '../../utils/map';
 
 export default class NewPage {
-    #presenter;
-    #form;
-    #camera;
-    #isCameraOpen = false;
-    #takenDocumentations = [];
+  #presenter;
+  #form;
+  #camera;
+  #isCameraOpen = false;
+  #takenDocumentations = [];
+  #map = null;
 
-    async render() {
-        return `
+  async render() {
+    return `
       <section>
         <div class="new-report__header">
           <div class="container">
@@ -104,191 +106,194 @@ export default class NewPage {
         </div>
       </section>
     `;
-    }
+  }
 
-    async afterRender() {
-        this.#presenter = new NewPresenter({
-            view: this,
-            model: StoryAPI,
-        });
-        this.#takenDocumentations = [];
+  async afterRender() {
+    this.#presenter = new NewPresenter({
+      view: this,
+      model: StoryAPI,
+    });
+    this.#takenDocumentations = [];
 
-        this.#presenter.showNewFormMap();
-        this.#setupForm();
-    }
+    this.#presenter.showNewFormMap();
+    this.#setupForm();
+  }
 
-    #setupForm() {
-        this.#form = document.getElementById('new-form');
-        this.#form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-
-            if (!this.#takenDocumentations.length) {
-                alert('Silakan unggah atau ambil minimal 1 gambar sebagai dokumentasi.');
-                return;
-            }
-            
-            const data = {
-                description: this.#form.elements.namedItem('description').value,
-                photo: this.#takenDocumentations[0]?.blob,
-                lat: this.#form.elements.namedItem('lat').value,
-                lon: this.#form.elements.namedItem('lon').value,
-            };
-            await this.#presenter.postNewReport(data);
-        });
-
-        document.getElementById('documentations-input').addEventListener('change', async (event) => {
-            const insertingPicturesPromises = Object.values(event.target.files).map(async (file) => {
-                return await this.#addTakenPicture(file);
-            });
-            await Promise.all(insertingPicturesPromises);
-
-            await this.#populateTakenPictures();
-        });
-
-        document.getElementById('documentations-input-button').addEventListener('click', () => {
-            this.#form.elements.namedItem('documentations-input').click();
-        });
-
-        const cameraContainer = document.getElementById('camera-container');
-        document
-            .getElementById('open-documentations-camera-button')
-            .addEventListener('click', async (event) => {
-                cameraContainer.classList.toggle('open');
-                this.#isCameraOpen = cameraContainer.classList.contains('open');
-
-                if (this.#isCameraOpen) {
-                    event.currentTarget.textContent = 'Tutup Kamera';
-                    this.#setupCamera();
-                    await this.#camera.launch();
-
-                    return;
-                }
-
-                event.currentTarget.textContent = 'Buka Kamera';
-                this.#camera.stop();
-            });
-    }
-
-    async initialMap() {
-        // TODO: map initialization
+  #setupForm() {
+    this.#form = document.getElementById('new-form');
+    this.#form.addEventListener('submit', async (event) => {
+      event.preventDefault();
 
 
+      if (!this.#takenDocumentations.length) {
+        alert('Silakan unggah atau ambil minimal 1 gambar sebagai dokumentasi.');
+        return;
+      }
 
-    }
+      const data = {
+        description: this.#form.elements.namedItem('description').value,
+        photo: this.#takenDocumentations[0]?.blob,
+        lat: parseFloat(this.#form.elements.namedItem('lat').value),
+        lon: parseFloat(this.#form.elements.namedItem('lon').value), 
+      };
 
-    #setupCamera() {
-        if (!this.#camera) {
-            this.#camera = new Camera({
-                video: document.getElementById('camera-video'),
-                cameraSelect: document.getElementById('camera-select'),
-                canvas: document.getElementById('camera-canvas'),
-            });
+      await this.#presenter.postNewReport(data);
+    });
+
+    document.getElementById('documentations-input').addEventListener('change', async (event) => {
+      const insertingPicturesPromises = Object.values(event.target.files).map(async (file) => {
+        return await this.#addTakenPicture(file);
+      });
+      await Promise.all(insertingPicturesPromises);
+
+      await this.#populateTakenPictures();
+    });
+
+    document.getElementById('documentations-input-button').addEventListener('click', () => {
+      this.#form.elements.namedItem('documentations-input').click();
+    });
+
+    const cameraContainer = document.getElementById('camera-container');
+    document
+      .getElementById('open-documentations-camera-button')
+      .addEventListener('click', async (event) => {
+        cameraContainer.classList.toggle('open');
+        this.#isCameraOpen = cameraContainer.classList.contains('open');
+
+        if (this.#isCameraOpen) {
+          event.currentTarget.textContent = 'Tutup Kamera';
+          this.#setupCamera();
+          await this.#camera.launch();
+
+          return;
         }
 
-        this.#camera.addCheeseButtonListener('#camera-take-button', async () => {
-            const image = await this.#camera.takePicture();
-            await this.#addTakenPicture(image);
-            await this.#populateTakenPictures();
-        });
+        event.currentTarget.textContent = 'Buka Kamera';
+        this.#camera.stop();
+      });
+  }
+
+  async initialMap() {
+    // TODO: map initialization
+    this.#map = await Map.build('#map', {
+      zoom: 10,
+      locate: true,
+    })
+
+  }
+
+  #setupCamera() {
+    if (!this.#camera) {
+      this.#camera = new Camera({
+        video: document.getElementById('camera-video'),
+        cameraSelect: document.getElementById('camera-select'),
+        canvas: document.getElementById('camera-canvas'),
+      });
     }
 
-    async #addTakenPicture(image) {
-        let blob = image;
+    this.#camera.addCheeseButtonListener('#camera-take-button', async () => {
+      const image = await this.#camera.takePicture();
+      await this.#addTakenPicture(image);
+      await this.#populateTakenPictures();
+    });
+  }
 
-        if (typeof image === 'string') {
-            blob = await convertBase64ToBlob(image, 'image/png');
-        }
+  async #addTakenPicture(image) {
+    let blob = image;
 
-        const newDocumentation = {
-            id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-            blob: blob,
-        };
-        this.#takenDocumentations = [...this.#takenDocumentations, newDocumentation];
+    if (typeof image === 'string') {
+      blob = await convertBase64ToBlob(image, 'image/png');
     }
 
-    async #populateTakenPictures() {
-        const html = this.#takenDocumentations.reduce((accumulator, picture, currentIndex) => {
-            const imageUrl = URL.createObjectURL(picture.blob);
-            return accumulator.concat(`
+    const newDocumentation = {
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      blob: blob,
+    };
+    this.#takenDocumentations = [...this.#takenDocumentations, newDocumentation];
+  }
+
+  async #populateTakenPictures() {
+    const html = this.#takenDocumentations.reduce((accumulator, picture, currentIndex) => {
+      const imageUrl = URL.createObjectURL(picture.blob);
+      return accumulator.concat(`
         <li class="new-form__documentations__outputs-item">
           <button type="button" data-deletepictureid="${picture.id}" class="new-form__documentations__outputs-item__delete-btn">
             <img src="${imageUrl}" alt="Dokumentasi ke-${currentIndex + 1}">
           </button>
         </li>
       `);
-        }, '');
+    }, '');
 
-        document.getElementById('documentations-taken-list').innerHTML = html;
+    document.getElementById('documentations-taken-list').innerHTML = html;
 
-        document.querySelectorAll('button[data-deletepictureid]').forEach((button) =>
-            button.addEventListener('click', (event) => {
-                const pictureId = event.currentTarget.dataset.deletepictureid;
+    document.querySelectorAll('button[data-deletepictureid]').forEach((button) =>
+      button.addEventListener('click', (event) => {
+        const pictureId = event.currentTarget.dataset.deletepictureid;
 
-                const deleted = this.#removePicture(pictureId);
-                if (!deleted) {
-                    console.log(`Picture with id ${pictureId} was not found`);
-                }
-
-                // Updating taken pictures
-                this.#populateTakenPictures();
-            }),
-        );
-    }
-
-    #removePicture(id) {
-        const selectedPicture = this.#takenDocumentations.find((picture) => {
-            return picture.id == id;
-        });
-
-        // Check if founded selectedPicture is available
-        if (!selectedPicture) {
-            return null;
+        const deleted = this.#removePicture(pictureId);
+        if (!deleted) {
+          console.log(`Picture with id ${pictureId} was not found`);
         }
 
-        // Deleting selected selectedPicture from takenPictures
-        this.#takenDocumentations = this.#takenDocumentations.filter((picture) => {
-            return picture.id != selectedPicture.id;
-        });
+        // Updating taken pictures
+        this.#populateTakenPictures();
+      }),
+    );
+  }
 
-        return selectedPicture;
+  #removePicture(id) {
+    const selectedPicture = this.#takenDocumentations.find((picture) => {
+      return picture.id == id;
+    });
+
+    // Check if founded selectedPicture is available
+    if (!selectedPicture) {
+      return null;
     }
 
-    storeSuccessfully(message) {
-        console.log(message);
-        this.clearForm();
+    // Deleting selected selectedPicture from takenPictures
+    this.#takenDocumentations = this.#takenDocumentations.filter((picture) => {
+      return picture.id != selectedPicture.id;
+    });
 
-        // Redirect page
-        location.hash = '/';
-    }
+    return selectedPicture;
+  }
 
-    storeFailed(message) {
-        alert(message);
-    }
+  storeSuccessfully(message) {
+    console.log(message);
+    this.clearForm();
 
-    clearForm() {
-        this.#form.reset();
-    }
+    // Redirect page
+    location.hash = '/';
+  }
 
-    showMapLoading() {
-        document.getElementById('map-loading-container').innerHTML = generateLoaderAbsoluteTemplate();
-    }
+  storeFailed(message) {
+    alert(message);
+  }
 
-    hideMapLoading() {
-        document.getElementById('map-loading-container').innerHTML = '';
-    }
+  clearForm() {
+    this.#form.reset();
+  }
 
-    showSubmitLoadingButton() {
-        document.getElementById('submit-button-container').innerHTML = `
+  showMapLoading() {
+    document.getElementById('map-loading-container').innerHTML = generateLoaderAbsoluteTemplate();
+  }
+
+  hideMapLoading() {
+    document.getElementById('map-loading-container').innerHTML = '';
+  }
+
+  showSubmitLoadingButton() {
+    document.getElementById('submit-button-container').innerHTML = `
       <button class="btn" type="submit" disabled>
         <i class="fas fa-spinner loader-button"></i> Buat Laporan
       </button>
     `;
-    }
+  }
 
-    hideSubmitLoadingButton() {
-        document.getElementById('submit-button-container').innerHTML = `
+  hideSubmitLoadingButton() {
+    document.getElementById('submit-button-container').innerHTML = `
       <button class="btn" type="submit">Buat Laporan</button>
     `;
-    }
+  }
 }
