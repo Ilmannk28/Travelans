@@ -24,9 +24,9 @@ export default class NewPresenter {
 
             const data = {
                 description: description,
-                evidenceImages: photo,
-                latitude: lat,
-                longitude: lon,
+                photo: photo,
+                lat: lat,
+                lon: lon,
             };
 
             const response = await this.#model.addNewStory(data);

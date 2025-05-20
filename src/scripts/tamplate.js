@@ -13,7 +13,6 @@ export function generateLoaderAbsoluteTemplate() {
 export function generateMainNavigationListTemplate() {
   return `
     <li><a id="report-list-button" class="report-list-button" href="#/">Daftar Laporan</a></li>
-    <li><a id="bookmark-button" class="bookmark-button" href="#/bookmark">Laporan Tersimpan</a></li>
   `;
 }
 

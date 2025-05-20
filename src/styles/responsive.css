@@ -1,0 +1,72 @@
+@media screen and (width > 1000px) {
+  .navigation-drawer {
+    min-height: auto;
+    width: auto;
+    padding: 0;
+    background-color: transparent;
+
+    flex-direction: row;
+    justify-content: space-between;
+
+    position: static;
+    box-shadow: none;
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .navigation-drawer__navlist-main,
+  .navigation-drawer__navlist {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .nav-list li a {
+    display: inline-block;
+  }
+
+  .drawer-button {
+    display: none;
+  }
+
+  #login-button:hover {
+    background-color: #0056b3;
+    color: white;
+    border-radius: 1rem;
+  }
+
+  #register-button:hover {
+    background-color: #0056b3;
+    color: white;
+    border-radius: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .new-form__documentations__buttons {
+    flex-direction: column;
+  }
+
+  .new-form__documentations__buttons button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+
+  .form-buttons {
+    flex-direction: column;
+  }
+
+  .form-buttons button {
+    width: 100%;
+  }
+
+  .btn-outline{
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .new-form__location__lat-lng input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}

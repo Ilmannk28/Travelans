@@ -2,6 +2,7 @@ import HomePresenter from './home-presenter';
 import * as StoryAPI from '../../data/api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { MAP_SERVICE_API_KEY } from '../../config';
 
 export default class HomePage {
   #presenter = null;
@@ -55,6 +56,9 @@ export default class HomePage {
           <img src="${story.photoUrl}" alt="${story.name}" width="150" />
           <p>${story.description}</p>
           <small>${new Date(story.createdAt).toLocaleString()}</small>
+          <a class="btn report-item__read-more" href="#/story/${story.id}">
+            Selengkapnya <i class="fas fa-arrow-right"></i>
+          </a>
         </div>
       </div>
     `).join('');
@@ -62,15 +66,40 @@ export default class HomePage {
 
   async initialMap() {
     this.#map = L.map('story-map').setView([-2.5, 117], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(this.#map);
 
-    // Tambahkan invalidateSize untuk memperbaiki layout
+    // Base layers
+    const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+    });
+
+    const mapTiler = L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${MAP_SERVICE_API_KEY}`, {
+      attribution: '© MapTiler © OpenStreetMap contributors',
+      tileSize: 512,
+      zoomOffset: -1,
+    });
+
+    const esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri'
+    });
+
+    // Tambahkan salah satu sebagai default layer
+    openStreetMap.addTo(this.#map);
+
+    // Layer control
+    const baseMaps = {
+      "OpenStreetMap": openStreetMap,
+      "MapTiler Streets": mapTiler,
+      "Esri World Imagery": esriWorldImagery
+    };
+
+    L.control.layers(baseMaps).addTo(this.#map);
+
+    // Perbaiki layout map
     setTimeout(() => {
       this.#map.invalidateSize();
     }, 0);
   }
+
 
 
   showMap(listStory) {

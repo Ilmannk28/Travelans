@@ -113,7 +113,7 @@ export async function addNewStory({description, photo, lat, lon}) {
   if (lat) formData.append('lat', lat);
   if (lon) formData.append('lon', lon);
 
-  const fetchResponse = await fetch(`${BASE_URL}/stories`, {
+  const fetchResponse = await fetch(ENDPOINTS.STORY_LIST, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -121,12 +121,15 @@ export async function addNewStory({description, photo, lat, lon}) {
     body: formData,
   });
 
-  const result = await fetchResponse.json();
+  const json = await fetchResponse.json();
   if (!fetchResponse.ok) {
-    throw new Error(result.message || 'Gagal mengirim laporan');
+    throw new Error(json.message || 'Gagal mengirim laporan');
   }
 
-  return result;
+  return {
+    ...json,
+    ok: fetchResponse.ok,
+  };
 }
 
 

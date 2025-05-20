@@ -1,5 +1,6 @@
 // CSS imports
 import '../styles/styles.css';
+import '../styles/responsive.css';
 // import 'tiny-slider/dist/tiny-slider.css';
 import 'leaflet/dist/leaflet.css';
 

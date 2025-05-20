@@ -91,8 +91,8 @@ export default class NewPage {
                   <div id="map-loading-container"></div>
                 </div>
                 <div class="new-form__location__lat-lng">
-                  <input type="number" name="lat" value="-6.175389">
-                  <input type="number" name="lon" value="106.827139">
+                  <input type="number" name="lat" value="-6.175389" disabled>
+                  <input type="number" name="lon" value="106.827139" disabled>
                 </div>
               </div>
             </div>
@@ -117,6 +117,7 @@ export default class NewPage {
 
     this.#presenter.showNewFormMap();
     this.#setupForm();
+
   }
 
   #setupForm() {
@@ -134,7 +135,7 @@ export default class NewPage {
         description: this.#form.elements.namedItem('description').value,
         photo: this.#takenDocumentations[0]?.blob,
         lat: parseFloat(this.#form.elements.namedItem('lat').value),
-        lon: parseFloat(this.#form.elements.namedItem('lon').value), 
+        lon: parseFloat(this.#form.elements.namedItem('lon').value),
       };
 
       await this.#presenter.postNewReport(data);
@@ -178,8 +179,35 @@ export default class NewPage {
     this.#map = await Map.build('#map', {
       zoom: 10,
       locate: true,
-    })
+    });
 
+    // Preparing marker for select coordinate
+    const centerCoordinate = this.#map.getCenter();
+
+    this.#updateLatLngInput(centerCoordinate.latitude, centerCoordinate.longitude);
+
+    const draggableMarker = this.#map.addMarker(
+      [centerCoordinate.latitude, centerCoordinate.longitude],
+      { draggable: 'true' },
+    );
+
+    draggableMarker.addEventListener('move', async (event) => {
+      const coordinate = event.target.getLatLng();
+      this.#updateLatLngInput(coordinate.lat, coordinate.lng);
+
+      const placeName = await Map.getPlaceNameByCoordinate(coordinate.lat, coordinate.lng);
+      draggableMarker.bindPopup(placeName).openPopup();
+    });
+
+    this.#map.addMapEventListener('click', (event) => {
+      draggableMarker.setLatLng(event.latlng);
+      event.sourceTarget.flyTo(event.latlng);
+    });
+  }
+
+  #updateLatLngInput(latitude, longitude) {
+    this.#form.elements.namedItem('lat').value = latitude;
+    this.#form.elements.namedItem('lon').value = longitude;
   }
 
   #setupCamera() {
