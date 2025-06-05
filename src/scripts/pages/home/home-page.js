@@ -3,6 +3,7 @@ import * as StoryAPI from '../../data/api';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MAP_SERVICE_API_KEY } from '../../config';
+import { StoryDB } from '../../data/database';
 
 export default class HomePage {
   #presenter = null;
@@ -28,6 +29,14 @@ export default class HomePage {
       model: StoryAPI,
     });
     await this.#presenter.init();
+
+    document.querySelector('#story-list').addEventListener('click', async (e) => {
+      if (e.target.classList.contains('delete-story')) {
+        const id = e.target.dataset.id;
+        await StoryDB.delete(id);
+        e.target.closest('.story-item').remove();
+      }
+    });
   }
 
   showLoading() {
@@ -56,9 +65,12 @@ export default class HomePage {
           <img src="${story.photoUrl}" alt="${story.name}" width="150" />
           <p>${story.description}</p>
           <small>${new Date(story.createdAt).toLocaleString()}</small>
-          <a class="btn report-item__read-more" href="#/story/${story.id}">
+          <div class="story-card__buttons">
+            <a class="btn report-item__read-more" href="#/story/${story.id}">
             Selengkapnya <i class="fas fa-arrow-right"></i>
-          </a>
+            </a>
+            <button class="delete-story" data-id="${story.id}">Hapus</button>
+          </div>
         </div>
       </div>
     `).join('');

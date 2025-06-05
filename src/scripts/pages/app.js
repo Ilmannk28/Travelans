@@ -7,6 +7,7 @@ import {
   generateMainNavigationListTemplate,
   generateUnauthenticatedNavigationListTemplate,
 } from '../tamplate';
+import { initPushNotificationButtons } from '../utils/push-notification';
 
 export default class App {
   #content;
@@ -76,11 +77,12 @@ export default class App {
         location.hash = '/login';
       }
     });
+    initPushNotificationButtons();
   }
 
   async renderPage() {
     const url = getActiveRoute();
-    const route = routes[url];
+    const route = routes[url] || routes['*'];;
 
     // Get page instance
     const page = route();

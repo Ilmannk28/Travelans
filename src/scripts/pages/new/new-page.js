@@ -4,6 +4,7 @@ import * as StoryAPI from '../../data/api';
 import { generateLoaderAbsoluteTemplate } from '../../tamplate';
 import Camera from '../../utils/camera';
 import Map from '../../utils/map';
+import { StoryDB } from '../../data/database';
 
 export default class NewPage {
   #presenter;
@@ -48,7 +49,7 @@ export default class NewPage {
               <div class="new-form__documentations__container">
                 <div class="new-form__documentations__buttons">
                   <button id="documentations-input-button" class="btn btn-outline" type="button">
-                    Ambil Gambar
+                   <i class="fa fa-camera"></i> Ambil Gambar
                   </button>
                   <input
                     id="documentations-input"
@@ -112,12 +113,12 @@ export default class NewPage {
     this.#presenter = new NewPresenter({
       view: this,
       model: StoryAPI,
+      db: StoryDB
     });
-    this.#takenDocumentations = [];
 
+    this.#takenDocumentations = [];
     this.#presenter.showNewFormMap();
     this.#setupForm();
-
   }
 
   #setupForm() {
@@ -165,10 +166,9 @@ export default class NewPage {
           event.currentTarget.textContent = 'Tutup Kamera';
           this.#setupCamera();
           await this.#camera.launch();
-
           return;
         }
-
+        
         event.currentTarget.textContent = 'Buka Kamera';
         this.#camera.stop();
       });

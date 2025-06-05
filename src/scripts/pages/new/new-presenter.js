@@ -1,10 +1,12 @@
 export default class NewPresenter {
     #view;
     #model;
+    #db;
 
-    constructor({ view, model }) {
+    constructor({ view, model, db }) {
         this.#view = view;
         this.#model = model;
+        this.#db = db;
     }
 
     async showNewFormMap() {
@@ -39,8 +41,23 @@ export default class NewPresenter {
 
             this.#view.storeSuccessfully(response.message);
         } catch (error) {
-            console.error('postNewReport: error:', error);
-            this.#view.storeFailed(error.message);
+            console.warn('Offline/Failed: Menyimpan ke IndexedDB');
+
+            if (this.#db) {
+                const fallbackStory = {
+                    id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                    description,
+                    photo,
+                    lat,
+                    lon,
+                    createdAt: new Date().toISOString(),
+                };
+
+                await this.#db.put(fallbackStory);
+                this.#view.storeSuccessfully('Laporan disimpan secara lokal (offline)');
+            } else {
+                this.#view.storeFailed(error.message);
+            }
         } finally {
             this.#view.hideSubmitLoadingButton();
         }

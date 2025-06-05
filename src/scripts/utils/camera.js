@@ -169,3 +169,4 @@ export default class Camera {
     this.#takePictureButton.onclick = callback;
   }
 }
+

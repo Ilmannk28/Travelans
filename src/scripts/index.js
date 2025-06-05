@@ -8,6 +8,8 @@ import 'leaflet/dist/leaflet.css';
 import App from './pages/app';
 import Camera from './utils/camera';
 
+import { registerSW } from 'virtual:pwa-register';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
     content: document.getElementById('main-content'),
@@ -16,7 +18,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     skipLinkButton: document.getElementById('skip-link'),
   });
   await app.renderPage();
-  
+
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      if (confirm('Update baru tersedia. Muat ulang sekarang?')) {
+        updateSW(true);
+      }
+    },
+    onOfflineReady() {
+      console.log('Aplikasi siap digunakan secara offline');
+    },
+  });
+
   window.addEventListener('hashchange', async () => {
     await app.renderPage();
     // Stop all active media

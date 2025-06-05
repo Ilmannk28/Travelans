@@ -138,5 +138,15 @@ export default class Map {
         return newMarker;
     }
 
+    addMapEventListener(eventName, callback) {
+        if (!this.#map) {
+            throw new Error('Map instance is not initialized');
+        }
 
+        this.#map.on(eventName, callback);
+    }
+    // Metode alternatif yang langsung mengakses instance Leaflet map
+    getLeafletInstance() {
+        return this.#map;
+    }
 }

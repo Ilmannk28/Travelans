@@ -1,3 +1,4 @@
+import {StoryDB} from "../../data/database";
 export default class HomePresenter {
   #view;
   #model;
@@ -22,26 +23,41 @@ export default class HomePresenter {
     this.#view.showLoading();
 
     try {
-      // Langkah 1: Inisialisasi peta
-      await this.#showStoryMap();
 
-      // Langkah 2: Ambil data cerita dari model
+      await this.#showStoryMap();
       const response = await this.#model.getStoryList();
 
-      // Langkah 3: Cek apakah response OK
       if (!response.ok) {
-        console.error('init: response not ok:', response);
-        this.#view.showError(response.message);
+        console.warn('API gagal, ambil dari IndexedDB...');
+        const localStories = await StoryDB.getAll();
+
+        if (localStories.length === 0) {
+          this.#view.showError('Gagal memuat data dan tidak ada data lokal.');
+        } else {
+          this.#view.showStories(localStories);
+          this.#view.showMap(localStories);
+        }
+
         return;
       }
 
-      // Langkah 4: Tampilkan cerita dan peta
       this.#view.showStories(response.listStory);
       this.#view.showMap(response.listStory);
 
+      response.listStory.forEach(story => {
+        StoryDB.put(story);
+      });
+
     } catch (error) {
       console.error('init: error:', error);
-      this.#view.showError('Terjadi kesalahan saat memuat data.');
+      const localStories = await StoryDB.getAll();
+
+      if (localStories.length === 0) {
+        this.#view.showError('Terjadi kesalahan saat memuat data dan tidak ada data offline.');
+      } else {
+        this.#view.showStories(localStories);
+        this.#view.showMap(localStories);
+      }
     } finally {
       this.#view.hideLoading();
     }
