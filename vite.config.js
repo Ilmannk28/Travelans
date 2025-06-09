@@ -16,7 +16,7 @@ export default defineConfig({
   },
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',// atau icon-icon lainnya
+      registerType: 'autoUpdate',
       manifest: {
         name: 'Travelans',
         short_name: 'Travelans',

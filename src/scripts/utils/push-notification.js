@@ -32,13 +32,21 @@ export function initPushNotificationButtons() {
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
+      const payload = {
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')))),
+          auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')))),
+        },
+      };
+
       await fetch(`${BASE_URL}/notifications/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAccessToken()}`,
         },
-        body: JSON.stringify(subscription),
+        body: JSON.stringify(payload),
       });
 
       alert('Berhasil subscribe!');

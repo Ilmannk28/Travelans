@@ -82,10 +82,10 @@ export default class App {
 
   async renderPage() {
     const url = getActiveRoute();
-    const route = routes[url] || routes['*'];;
+    const route = routes[url] || routes['*'];
 
     // Get page instance
-    const page = route();
+    const page = typeof route === 'function' ? route() : route;
 
     const transition = transitionHelper({
       updateDOM: async () => {

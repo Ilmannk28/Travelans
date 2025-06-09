@@ -69,6 +69,7 @@ export default class HomePage {
             <a class="btn report-item__read-more" href="#/story/${story.id}">
             Selengkapnya <i class="fas fa-arrow-right"></i>
             </a>
+            
             <button class="delete-story" data-id="${story.id}">Hapus</button>
           </div>
         </div>
