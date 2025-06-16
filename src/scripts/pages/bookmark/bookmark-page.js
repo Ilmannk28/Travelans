@@ -46,12 +46,21 @@ export default class BookmarkPage {
     `).join('');
 
     list.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('delete-bookmark')) {
-        const id = e.target.dataset.id;
-        await StoryDB.delete(id);
-        e.target.closest('.story-item').remove();
-      }
-    });
+  if (e.target.classList.contains('delete-bookmark')) {
+    const id = e.target.dataset.id;
+
+    
+    const confirmDelete = confirm('Apakah Anda yakin ingin menghapus cerita ini dari bookmark?');
+    if (!confirmDelete) return;
+
+    // Hapus dari database
+    await StoryDB.delete(id);
+
+    e.target.closest('.story-item').remove();
+    alert('Cerita berhasil dihapus dari bookmark.');
+  }
+});
+
   }
 
   showError(message) {
