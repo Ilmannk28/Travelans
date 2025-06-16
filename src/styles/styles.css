@@ -126,15 +126,14 @@ header {
   color: black;
 }
 
-
 .navigation-drawer__navlist li button {
   color: white;
 }
 
-.navigation-drawer__navlist li a{
+.navigation-drawer__navlist li a {
   color: #007bff;
   background-color: transparent;
-   font-weight: 600;
+  font-weight: 600;
 }
 
 .navigation-drawer__navlist-main li a,
@@ -255,14 +254,38 @@ header {
   margin-top: 1rem;
 }
 
-.delete-story {
-  background-color: #ff0000;
-  color: white;
+.story-card__actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.save-story {
+  width: 100%;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   text-align: center;
   font-size: 1rem;
   border: none;
+  background-color: #4caf50;
+  color: white;
+}
+
+.save-story:hover {
+  background-color: #43a047;
+  color: white;
+}
+
+
+.delete-story {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 1rem;
+  border: none;
+  background-color: #ff0000;
+  color: white;
 }
 
 .delete-story:hover {

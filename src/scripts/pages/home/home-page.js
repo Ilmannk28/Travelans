@@ -30,11 +30,26 @@ export default class HomePage {
     });
     await this.#presenter.init();
 
-    document.querySelector('#story-list').addEventListener('click', async (e) => {
+    const storyList = document.querySelector('#story-list');
+
+    storyList.addEventListener('click', async (e) => {
+      const id = e.target.dataset.id;
+
+      // Hapus story
       if (e.target.classList.contains('delete-story')) {
-        const id = e.target.dataset.id;
         await StoryDB.delete(id);
         e.target.closest('.story-item').remove();
+      }
+
+      // Simpan story
+      if (e.target.classList.contains('save-story')) {
+        const story = await this.#presenter.getStoryById(id);
+        if (story) {
+          await StoryDB.put(story);
+          alert(`Cerita "${story.name}" berhasil disimpan ke offline storage.`);
+        } else {
+          alert('Gagal menyimpan cerita. Data tidak ditemukan.');
+        }
       }
     });
   }
@@ -69,8 +84,10 @@ export default class HomePage {
             <a class="btn report-item__read-more" href="#/story/${story.id}">
             Selengkapnya <i class="fas fa-arrow-right"></i>
             </a>
-            
+            <div class="story-card__actions">
+            <button class="save-story" data-id="${story.id}">Simpan</button>
             <button class="delete-story" data-id="${story.id}">Hapus</button>
+            </div>
           </div>
         </div>
       </div>

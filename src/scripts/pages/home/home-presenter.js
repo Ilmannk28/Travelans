@@ -1,4 +1,4 @@
-import {StoryDB} from "../../data/database";
+import { StoryDB } from "../../data/database";
 export default class HomePresenter {
   #view;
   #model;
@@ -62,4 +62,16 @@ export default class HomePresenter {
       this.#view.hideLoading();
     }
   }
+
+  async getStoryById(id) {
+  try {
+    const response = await this.#model.getStoryDetail(id);
+    if (!response.ok) throw new Error('Response not OK');
+    return response.story;
+  } catch (error) {
+    console.error('Gagal mengambil story:', error);
+    return null;
+  }
+}
+
 }

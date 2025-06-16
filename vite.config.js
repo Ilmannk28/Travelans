@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   root: resolve(__dirname, 'src'),
-  publicDir: resolve(__dirname, 'public'),
+  publicDir: resolve(__dirname, 'src/public'),
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
@@ -17,26 +17,10 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      manifest: {
-        name: 'Travelans',
-        short_name: 'Travelans',
-        start_url: '/',
-        display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#3f51b5',
-        icons: [
-          {
-            src: '/icon-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          }
-        ]
-      },
+      includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
+      // Gunakan manifest eksternal
+      manifestFilename: 'manifest.webmanifest',
+      useCredentials: true,
       workbox: {
         runtimeCaching: [
           {
