@@ -33,25 +33,19 @@ export default class HomePage {
     const storyList = document.querySelector('#story-list');
 
     storyList.addEventListener('click', async (e) => {
-      const id = e.target.dataset.id;
-
-      // Hapus story
-      if (e.target.classList.contains('delete-story')) {
-        await StoryDB.delete(id);
-        e.target.closest('.story-item').remove();
-      }
-
-      // Simpan story
       if (e.target.classList.contains('save-story')) {
+        const id = e.target.dataset.id;
         const story = await this.#presenter.getStoryById(id);
-        if (story) {
-          await StoryDB.put(story);
-          alert(`Cerita "${story.name}" berhasil disimpan ke offline storage.`);
-        } else {
-          alert('Gagal menyimpan cerita. Data tidak ditemukan.');
-        }
+        if (!story) return alert('Gagal menyimpan: data tidak ditemukan.');
+
+        const isExist = await StoryDB.get(story.id);
+        if (isExist) return alert('Cerita sudah disimpan.');
+
+        await StoryDB.put(story);
+        alert(`Cerita "${story.name}" berhasil disimpan ke bookmark.`);
       }
     });
+
   }
 
   showLoading() {
@@ -86,7 +80,6 @@ export default class HomePage {
             </a>
             <div class="story-card__actions">
             <button class="save-story" data-id="${story.id}">Simpan</button>
-            <button class="delete-story" data-id="${story.id}">Hapus</button>
             </div>
           </div>
         </div>

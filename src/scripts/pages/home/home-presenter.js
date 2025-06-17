@@ -44,9 +44,9 @@ export default class HomePresenter {
       this.#view.showStories(response.listStory);
       this.#view.showMap(response.listStory);
 
-      response.listStory.forEach(story => {
-        StoryDB.put(story);
-      });
+      // response.listStory.forEach(story => {
+      //   StoryDB.put(story);
+      // });
 
     } catch (error) {
       console.error('init: error:', error);
@@ -64,14 +64,26 @@ export default class HomePresenter {
   }
 
   async getStoryById(id) {
+    try {
+      const response = await this.#model.getStoryDetail(id);
+      if (!response.ok) throw new Error('Response not OK');
+      return response.story;
+    } catch (error) {
+      console.error('Gagal mengambil story:', error);
+      return null;
+    }
+  }
+
+  async removeStory(id) {
   try {
-    const response = await this.#model.getStoryDetail(id);
-    if (!response.ok) throw new Error('Response not OK');
-    return response.story;
+    await this.#model.deleteStory(id);
+    await StoryDB.delete(id);        
+    return true;
   } catch (error) {
-    console.error('Gagal mengambil story:', error);
-    return null;
+    console.error('removeStory: error:', error);
+    return false;
   }
 }
+
 
 }

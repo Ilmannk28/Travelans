@@ -69,6 +69,22 @@
     width: 100%;
     margin-bottom: 0.5rem;
   }
+
+    .story-item {
+    flex: 1 1 100%;
+  }
+
+  .story-card__buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .story-card__buttons .btn,
+  .story-card__buttons .delete-bookmark {
+    width: 100%;
+    text-align: center;
+  }
+
 }
 
 @media (max-width: 480px) {
