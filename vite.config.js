@@ -18,7 +18,6 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
-      // Gunakan manifest eksternal
       manifestFilename: 'manifest.webmanifest',
       useCredentials: true,
       workbox: {
