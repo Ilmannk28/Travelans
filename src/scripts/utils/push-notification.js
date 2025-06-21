@@ -9,7 +9,7 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 function getAccessToken() {
-  return localStorage.getItem('accessToken'); // sesuaikan kalau kamu pakai storage lain
+  return localStorage.getItem('accessToken');
 }
 
 export function initPushNotificationButtons() {
@@ -17,15 +17,33 @@ export function initPushNotificationButtons() {
   if (!container) return;
 
   container.innerHTML = `
-    <button id="subscribe-btn">Subscribe</button>
-    <button id="unsubscribe-btn" style="display: none;">Unsubscribe</button>
+    <div class="push-notification-container">
+      <button id="subscribe-btn" class="btn btn-small">🔔 Subscribe</button>
+      <button id="unsubscribe-btn" class="btn btn-small" style="display: none;">🔕 Unsubscribe</button>
+      <span id="notification-status" class="notification-status"></span>
+    </div>
   `;
 
   const subscribeBtn = document.getElementById('subscribe-btn');
   const unsubscribeBtn = document.getElementById('unsubscribe-btn');
+  const statusSpan = document.getElementById('notification-status');
+
+  function updateStatus(message, isError = false) {
+    statusSpan.textContent = message;
+    statusSpan.className = `notification-status ${isError ? 'error' : 'success'} show`;
+
+    setTimeout(() => {
+      statusSpan.className = `notification-status ${isError ? 'error' : 'success'}`;
+      statusSpan.textContent = '';
+    }, 3000);
+  }
+
 
   subscribeBtn.addEventListener('click', async () => {
     try {
+      subscribeBtn.disabled = true;
+      subscribeBtn.textContent = 'Subscribing...';
+
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -40,7 +58,7 @@ export function initPushNotificationButtons() {
         },
       };
 
-      await fetch(`${BASE_URL}/notifications/subscribe`, {
+      const response = await fetch(`${BASE_URL}/notifications/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,20 +67,29 @@ export function initPushNotificationButtons() {
         body: JSON.stringify(payload),
       });
 
-      alert('Berhasil subscribe!');
+      if (!response.ok) throw new Error('Gagal subscribe ke server');
+
+      updateStatus('Berhasil subscribe notifikasi!');
       subscribeBtn.style.display = 'none';
       unsubscribeBtn.style.display = 'inline-block';
     } catch (error) {
-      console.error('Gagal subscribe', error);
+      console.error('Gagal subscribe:', error);
+      updateStatus('Gagal subscribe notifikasi', true);
+    } finally {
+      subscribeBtn.disabled = false;
+      subscribeBtn.textContent = '🔔 Subscribe';
     }
   });
 
   unsubscribeBtn.addEventListener('click', async () => {
     try {
+      unsubscribeBtn.disabled = true;
+      unsubscribeBtn.textContent = 'Unsubscribing...';
+
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
-        await fetch(`${BASE_URL}/notifications/subscribe`, {
+        const response = await fetch(`${BASE_URL}/notifications/subscribe`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -71,22 +98,37 @@ export function initPushNotificationButtons() {
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
 
+        if (!response.ok) throw new Error('Gagal unsubscribe ke server');
+
         await subscription.unsubscribe();
-        alert('Berhasil unsubscribe!');
+
+        updateStatus('Berhasil unsubscribe notifikasi!');
         subscribeBtn.style.display = 'inline-block';
         unsubscribeBtn.style.display = 'none';
       }
     } catch (error) {
-      console.error('Gagal unsubscribe', error);
+      console.error('Gagal unsubscribe:', error);
+      updateStatus('Gagal unsubscribe notifikasi', true);
+    } finally {
+      unsubscribeBtn.disabled = false;
+      unsubscribeBtn.textContent = '🔕 Unsubscribe';
     }
   });
 
-  // Cek status awal
-  navigator.serviceWorker.ready.then(async (registration) => {
-    const subscription = await registration.pushManager.getSubscription();
-    if (subscription) {
-      subscribeBtn.style.display = 'none';
-      unsubscribeBtn.style.display = 'inline-block';
+  // Cek status awal saat load
+  (async function checkInitialStatus() {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        subscribeBtn.style.display = 'none';
+        unsubscribeBtn.style.display = 'inline-block';
+      } else {
+        subscribeBtn.style.display = 'inline-block';
+        unsubscribeBtn.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Gagal memeriksa status awal:', error);
     }
-  });
+  })();
 }
