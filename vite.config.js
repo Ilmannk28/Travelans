@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   root: resolve(__dirname, 'src'),
@@ -14,23 +13,4 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
-  plugins: [
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'icon-192x192.png', 'icon-512x512.png'],
-      manifestFilename: 'manifest.webmanifest',
-      useCredentials: true,
-      workbox: {
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/story-api\.dicoding\.dev\/v1\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-            },
-          },
-        ],
-      }
-    })
-  ]
 });

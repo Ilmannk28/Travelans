@@ -8,8 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import App from './pages/app';
 import Camera from './utils/camera';
 
-import { registerSW } from 'virtual:pwa-register';
-
+// Service Worker manual registration
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
     content: document.getElementById('main-content'),
@@ -19,16 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   await app.renderPage();
 
-  const updateSW = registerSW({
-    onNeedRefresh() {
-      if (confirm('Update baru tersedia. Muat ulang sekarang?')) {
-        updateSW(true);
-      }
-    },
-    onOfflineReady() {
-      console.log('Aplikasi siap digunakan secara offline');
-    },
-  });
+  // Manual service worker registration
+  await navigator.serviceWorker.register('sw.js');
 
   window.addEventListener('hashchange', async () => {
     await app.renderPage();
@@ -36,4 +27,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     Camera.stopAllStreams();
   });
 });
-
