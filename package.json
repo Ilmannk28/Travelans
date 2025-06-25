@@ -22,7 +22,10 @@
     "picocolors": "^1.1.1",
     "postcss": "^8.5.3",
     "rollup": "^4.34.8",
-    "source-map-js": "^1.2.1"
+    "source-map-js": "^1.2.1",
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0"
   },
   "author": "",
   "license": "ISC",
