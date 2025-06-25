@@ -40,14 +40,14 @@ export default class HomePresenter {
       }
 
       // Store fresh data to IndexedDB
-      const storiesToStore = response.listStory.map(story => ({
-        ...story,
-        isOffline: false
-      }));
+      // const storiesToStore = response.listStory.map(story => ({
+      //   ...story,
+      //   isOffline: false
+      // }));
 
-      for (const story of storiesToStore) {
-        await StoryDB.put(story);
-      }
+      // for (const story of storiesToStore) {
+      //   await StoryDB.put(story);
+      // }
 
       this.#view.showStories(response.listStory);
       this.#view.showMap(response.listStory);
