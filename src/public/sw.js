@@ -1,11 +1,12 @@
 import { precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import { NetworkFirst, StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
 
 // Inject semua file dari globPatterns di vite.config.js
 precacheAndRoute(self.__WB_MANIFEST);
 
-// API
+// ✅ API dari endpoint /v1
 registerRoute(
   ({ url }) => url.origin === 'https://story-api.dicoding.dev' && url.pathname.startsWith('/v1'),
   new NetworkFirst({
@@ -13,7 +14,7 @@ registerRoute(
   })
 );
 
-// Static resources
+// ✅ Static JS/CSS
 registerRoute(
   ({ request }) => request.destination === 'script' || request.destination === 'style',
   new StaleWhileRevalidate({
@@ -21,7 +22,7 @@ registerRoute(
   })
 );
 
-// HTML
+// ✅ HTML document
 registerRoute(
   ({ request }) => request.destination === 'document',
   new NetworkFirst({
@@ -29,19 +30,40 @@ registerRoute(
   })
 );
 
-// Images
+// ✅ Gambar lokal (dari server kamu)
 registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
     cacheName: 'image-cache',
-    expiration: {
-      maxEntries: 50,
-      maxAgeSeconds: 30 * 24 * 60 * 60, // 30 hari
-    },
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
+    ],
   })
 );
 
-// Push notification handler
+// ✅ Gambar dari server story-api.dicoding.dev (termasuk .blob)
+registerRoute(
+  ({ url }) =>
+    url.origin === 'https://story-api.dicoding.dev' &&
+    url.pathname.startsWith('/images/'),
+  new CacheFirst({
+    cacheName: 'external-images',
+    fetchOptions: {
+      mode: 'no-cors', // untuk handle opaque response dari CDN atau server tanpa CORS
+    },
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
+    ],
+  })
+);
+
+// ✅ Push notification handler
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
   const title = data.title || 'Notifikasi';
