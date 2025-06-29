@@ -1,63 +1,55 @@
-const CACHE_NAME = 'travelans-v1';
-const API_URL = "https://story-api.dicoding.dev/v1/";
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/scripts/index.js',
-  '/styles/styles.css',
-  '/favicon.png',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
-];
+import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { NetworkFirst, StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
-});
+// Inject semua file dari globPatterns di vite.config.js
+precacheAndRoute(self.__WB_MANIFEST);
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      );
-    })
-  );
-});
+// API
+registerRoute(
+  ({ url }) => url.origin === 'https://story-api.dicoding.dev' && url.pathname.startsWith('/v1'),
+  new NetworkFirst({
+    cacheName: 'api-cache',
+  })
+);
 
-self.addEventListener("fetch", (event) => {
-  const request = event.request;
-  if (request.url.startsWith(API_URL)) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Clone response dan simpan ke cache
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request);
-        })
-    );
-  } else {
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        return cachedResponse || fetch(request);
-      })
-    );
-  }
-});
+// Static resources
+registerRoute(
+  ({ request }) => request.destination === 'script' || request.destination === 'style',
+  new StaleWhileRevalidate({
+    cacheName: 'static-resources',
+  })
+);
 
-// Handler untuk push notification (tetap ada)
+// HTML
+registerRoute(
+  ({ request }) => request.destination === 'document',
+  new NetworkFirst({
+    cacheName: 'html-pages',
+  })
+);
+
+// Images
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'image-cache',
+    expiration: {
+      maxEntries: 50,
+      maxAgeSeconds: 30 * 24 * 60 * 60, // 30 hari
+    },
+  })
+);
+
+// Push notification handler
 self.addEventListener('push', (event) => {
-  const data = event.data?.json();
-  const { title, options } = data;
+  const data = event.data?.json() || {};
+  const title = data.title || 'Notifikasi';
+  const options = data.options || {
+    body: 'Ada notifikasi baru!',
+    icon: '/favicon.png',
+  };
+
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
