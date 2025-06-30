@@ -111,7 +111,7 @@ registerRoute(
   })
 );
 
-// Optional: Cache warming manual untuk gambar
+// Cache warming manual untuk gambar
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CACHE_STORY_IMAGE') {
     const { imageUrl } = event.data;
@@ -121,7 +121,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Background Sync (opsional)
+// Background Sync
 self.addEventListener('sync', (event) => {
   if (event.tag === 'background-sync-stories') {
     event.waitUntil(Promise.resolve());
