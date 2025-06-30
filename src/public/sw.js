@@ -6,7 +6,7 @@ import { ExpirationPlugin } from 'workbox-expiration';
 // Inject semua file dari globPatterns di vite.config.js
 precacheAndRoute(self.__WB_MANIFEST);
 
-// ✅ API dari endpoint /v1
+
 registerRoute(
   ({ url }) => url.origin === 'https://story-api.dicoding.dev' && url.pathname.startsWith('/v1'),
   new NetworkFirst({
@@ -14,7 +14,7 @@ registerRoute(
   })
 );
 
-// ✅ Static JS/CSS
+
 registerRoute(
   ({ request }) => request.destination === 'script' || request.destination === 'style',
   new StaleWhileRevalidate({
@@ -22,7 +22,6 @@ registerRoute(
   })
 );
 
-// ✅ HTML document
 registerRoute(
   ({ request }) => request.destination === 'document',
   new NetworkFirst({
@@ -30,7 +29,7 @@ registerRoute(
   })
 );
 
-// ✅ Gambar lokal (dari server kamu)
+
 registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
@@ -44,7 +43,7 @@ registerRoute(
   })
 );
 
-// ✅ Gambar dari server story-api.dicoding.dev (termasuk .blob)
+
 registerRoute(
   ({ url }) =>
     url.origin === 'https://story-api.dicoding.dev' &&
@@ -63,7 +62,7 @@ registerRoute(
   })
 );
 
-// ✅ Push notification handler
+
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
   const title = data.title || 'Notifikasi';

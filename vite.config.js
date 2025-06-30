@@ -20,6 +20,21 @@ export default defineConfig({
       strategies: 'injectManifest',
       swSrc: resolve(__dirname, 'src/public/sw.js'),
       swDest: 'sw.js',
+      includeAssets: [
+        'images/screenshots/Travellans01.png',
+        'images/screenshots/Travellans02.png',
+        'images/screenshots/Travellans03.png',
+        'images/screenshots/Travellans04.png',
+        'images/screenshots/Travellans05.png',
+        'images/screenshots/Travellans06.png',
+        'fonts/Poppins-Regular.woff2',
+        'fonts/Poppins-Bold.woff2'
+      ],
+      globPatterns: [
+        '**/*.{js,css,html,webmanifest,png,jpg,jpeg,svg,woff2,woff,ttf}',
+        'images/screenshots/*.{png,jpg,jpeg}',
+        'fonts/*.{woff2,woff,ttf}'
+      ],
       manifest: {
         name: 'Travellans App',
         short_name: 'Travellans',
