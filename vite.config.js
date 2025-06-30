@@ -28,7 +28,6 @@ export default defineConfig({
         'images/screenshots/Travellans05.png',
         'images/screenshots/Travellans06.png',
         'fonts/Poppins-Regular.woff2',
-        'fonts/Poppins-Bold.woff2'
       ],
       globPatterns: [
         '**/*.{js,css,html,webmanifest,png,jpg,jpeg,svg,woff2,woff,ttf}',
